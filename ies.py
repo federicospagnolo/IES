@@ -137,9 +137,9 @@ for data in val_dataloader:
      inputs = data["inputs"].to(device) # 0 is flair, 1 is mprage
      std = std_fraction * (inputs[0,0].max() - inputs[0,0].min())
      input_affine = nib.load(filename).affine
-     
-     #outputs = model(inputs)
+
      inputs.requires_grad_()
+     #outputs = model(inputs)
      outputs = inferer(inputs=inputs, network=model)  # [1, 2, H, W, D]
      outputs = activation(outputs)  # [1, 2, H, W, D]
      grad_input, = torch.autograd.grad(outputs[0,1].sum(), inputs)
