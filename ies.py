@@ -55,7 +55,7 @@ def form_cluster(data_array:np.array, struct:np.array=np.ones([3, 3, 3])):
 # current folder
 script_folder = os.path.dirname(os.path.realpath(__file__))
 # set output folder
-output_dir = "attention_maps/output"
+output_dir = "attention_maps"
 
 parser = argparse.ArgumentParser(
 description='''Saliency map generation.
@@ -102,7 +102,7 @@ activation = torch.nn.Softmax(dim=1)
 
 ''' Define validation actors '''
 inferer = SlidingWindowInferer(roi_size=(96, 96, 96),
-                                   sw_batch_size=4, mode='gaussian', overlap=0.25)
+                                   sw_batch_size=1, mode='gaussian', overlap=0.25)
 
 print("Best model save file loaded from:", model_path)
 
@@ -142,18 +142,13 @@ for data in val_dataloader:
      #outputs = model(inputs)
      outputs = inferer(inputs=inputs, network=model)  # [1, 2, H, W, D]
      outputs = activation(outputs)  # [1, 2, H, W, D]
-     grad_input, = torch.autograd.grad(outputs[0,1].sum(), inputs)
-     flair_grad3d = grad_input[0,0].detach()
-     flair_grad3d[flair_grad3d != 0] = 1
-     print(flair_grad3d.sum())
-     break
      output_mask = outputs[0,1].detach().cpu().numpy()
      output_mask[output_mask > threshold] = 1
      output_mask[output_mask < threshold] = 0
 
      # Save predicted output
      pred = nib.Nifti1Image(output_mask, input_affine)
-     outputname = (filename.split("ectrims/", 1)[1]).split("/flair", 1)[0].replace('/', '-') + ".nii.gz"
+     outputname = (filename.split("data/", 1)[1]).split("/flair", 1)[0].replace('/', '-') + ".nii.gz"
      nib.save(pred, "{}/pred_{}".format(output_dir, outputname))
      
      wm_labels = get_lesion_types_masks(output_mask, output_mask, 'non_zero', n_jobs = 2)['TPL']        
