@@ -28,12 +28,10 @@ import argparse
 import logging
 import os
 import sys
-from skimage import measure
 import matplotlib.pyplot as plt
 import numpy.ma as ma
 from tqdm import tqdm
 import pandas as pd
-from plotnine import *
 
 def dp(path1: str, path2: str) -> str:
     return os.path.join(path1, path2)
