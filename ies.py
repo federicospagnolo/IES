@@ -1,5 +1,6 @@
 ################
 #written by Federico Spagnolo
+#usage: python ies.py --model_checkpoint model_epoch_31.pth --input_val_paths batch_data batch_data --input_prefixes flair_3d_sbr.nii.gz t1n_3d_sb.nii.gz --num_workers 0 --cache_rate 0.01 --threshold 0.3
 ################
 # Import torch
 import torch
@@ -32,6 +33,9 @@ import matplotlib.pyplot as plt
 import numpy.ma as ma
 from tqdm import tqdm
 import pandas as pd
+import gc
+import time
+import psutil
 
 def dp(path1: str, path2: str) -> str:
     return os.path.join(path1, path2)
@@ -86,7 +90,7 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 
 # Init your model
 model = UNet(spatial_dims=3, in_channels=len(args.input_modalities), out_channels=args.n_classes,
-                     channels=(32, 64, 128, 256, 512), strides=(2, 2, 2, 2), norm='batch', num_res_units=0).to(device)
+                     channels=(32, 64, 128, 256, 512), strides=(2, 2, 2, 2), norm='batch', num_res_units=0).cuda()
 # Weights intialization
 for layer in model.model.modules():
         if type(layer) == torch.nn.Conv3d:
@@ -94,7 +98,7 @@ for layer in model.model.modules():
 
 # Load best model weights
 model_path = dp(script_folder, model_checkpoint)
-print(model_path)
+#print(model_path)
 model = torch.nn.DataParallel(model).cuda()
 model.load_state_dict(torch.load(args.model_checkpoint, map_location='cuda'))
 model.eval()
@@ -104,7 +108,7 @@ activation = torch.nn.Softmax(dim=1)
 inferer = SlidingWindowInferer(roi_size=(96, 96, 96),
                                    sw_batch_size=1, mode='gaussian', overlap=0.25)
 
-print("Best model save file loaded from:", model_path)
+logging.info(f"Best model save file loaded from: {model_path}")
 
 # Load Dataset
 val_transforms = get_valnotarget_transforms(input_keys=args.input_modalities).set_random_state(seed=seed)
@@ -126,19 +130,20 @@ nb_smooth = 50
 layer = "module.model.1.submodule.2.conv"
 for name, _ in model.named_modules(): print(name)
 cam = GradCAMpp(nn_module=model, target_layers=layer)
-
 logging.info(f"Initializing the dataset. Number of subjects {len(val_dataloader)}")
 
 # Batch Loading
+
 for data in val_dataloader:
-         
+
      filename = data['flair_meta_dict']['filename_or_obj'][0]
-     print("Evaluate gradients in batch", filename)
-     inputs = data["inputs"].to(device) # 0 is flair, 1 is mprage
+     logging.info(f"Evaluate gradients in batch {filename}")
+     inputs = data["inputs"].cuda() # 0 is flair, 1 is mprage
      std = std_fraction * (inputs[0,0].max() - inputs[0,0].min())
      input_affine = nib.load(filename).affine
 
      inputs.requires_grad_()
+     
      #outputs = model(inputs)
      outputs = inferer(inputs=inputs, network=model)  # [1, 2, H, W, D]
      outputs = activation(outputs)  # [1, 2, H, W, D]
@@ -149,12 +154,19 @@ for data in val_dataloader:
      # Save predicted output
      pred = nib.Nifti1Image(output_mask, input_affine)
      outputname = (filename.split("data/", 1)[1]).split("/flair", 1)[0].replace('/', '-') + ".nii.gz"
-     nib.save(pred, "{}/pred_{}".format(output_dir, outputname))
+     patientname = (filename.split("data/", 1)[1]).split("/flair", 1)[0].replace('/', '-')
      
-     wm_labels = get_lesion_types_masks(output_mask, output_mask, 'non_zero', n_jobs = 2)['TPL']        
+     try:
+            os.mkdir('./' + output_dir + '/' + patientname)
+     except FileExistsError:
+            logging.info(f"Directory {'./' + output_dir + '/' + patientname} already exists")
+
+     nib.save(pred, "{}/{}/pred_{}".format(output_dir, patientname, outputname))
+     
+     wm_labels = get_lesion_types_masks(output_mask, output_mask, 'non_zero', n_jobs = 1)['TPL']        
      selected_group = nib.Nifti1Image(wm_labels, input_affine)
 
-     print("unpruned are: ", np.max(wm_labels))
+     logging.info(f"Detected lesions: {np.max(wm_labels)}")
      label = 1
      while label <= np.max(wm_labels):
           patch_vector = np.where(wm_labels==label)
@@ -165,58 +177,59 @@ for data in val_dataloader:
                label = label + 1     
 
      n_labels = np.max(wm_labels)
-     print("pruned are: ", n_labels)
+     logging.info(f"Detected lesions > 5mm³: {n_labels}")
      
      selected_group = nib.Nifti1Image(wm_labels, input_affine)
-     nib.save(selected_group, "{}/group_{}".format(output_dir, outputname))
+     nib.save(selected_group, "{}/{}/group_{}".format(output_dir, patientname, outputname))
      
-     smoothed_mprageq = [0]
-     smoothed_flairq = [0]
+     # Generate and save GCAM++
+     print("Generating XAI maps for method 1: GradCAM++...")
+     for label in range(1, n_labels):
+          patch_vector = np.where(wm_labels==label)
+          gcam = cam(x=inputs, class_idx=1, footprint=patch_vector)
+          gcam_map = nib.Nifti1Image(gcam[0,0].cpu().numpy(), input_affine)
+          nib.save(gcam_map, "{}/{}/GradCAM_lesion{}_layer_{}_{}".format(output_dir, patientname, label, layer, outputname))
           
+     logging.info(f"Generating XAI maps for method 2: SmoothGrad...")
+     smoothed_mprage = torch.empty((n_labels,outputs[0,1].size(0),outputs[0,1].size(1),outputs[0,1].size(2)), device='cuda')
+     smoothed_flair = torch.empty((n_labels,outputs[0,1].size(0),outputs[0,1].size(1),outputs[0,1].size(2)), device='cuda')
+     inputs.requires_grad = False
+     
      for q in tqdm(range(nb_smooth)):
+
           noisy_input = inputs + inputs.new(inputs.size()).normal_(0, std)
           noisy_input.requires_grad_()
-          outputs = model(noisy_input)
-          output_mask = outputs[0,1].detach().cpu().numpy()
-          smoothed_mprage = []
-          smoothed_flair = []
           
+          outputs = model(noisy_input)
+          output_mask = outputs[0,1]
+
           for label in range(1, n_labels):
                #print("        Lesion {}/{}".format(label,n_labels))
                patch_vector = np.where(wm_labels==label)
 
-               flair_grad3d = np.zeros_like(output_mask)
-               mprage_grad3d = np.zeros_like(output_mask)
                grad_input, = torch.autograd.grad(outputs[0,1][patch_vector].sum(), noisy_input, retain_graph=True)
-               flair_grad3d = grad_input[0,0].detach().cpu().numpy()
-               mprage_grad3d = grad_input[0,1].detach().cpu().numpy()
-
-               smoothed_flair.insert(label-1, flair_grad3d/len(patch_vector[0]))
-               smoothed_mprage.insert(label-1, mprage_grad3d/len(patch_vector[0]))
-               #print(np.shape(smoothed_mprage))
-          # Sum over noisy versions     
-          smoothed_flairq = np.add(np.array(smoothed_flairq), np.array(smoothed_flair))
-          smoothed_mprageq = np.add(np.array(smoothed_mprageq), np.array(smoothed_mprage))
-          #print(np.shape(smoothed_mprageq))           
+               
+               smoothed_flair[label-1] = smoothed_flair[label-1] + grad_input[0,0]
+               smoothed_mprage[label-1] = smoothed_mprage[label-1] + grad_input[0,1]
+         
      # Obtain avg over noisy versions and save lesion saliency
-     #print(np.shape(smoothed_flairq))
-     flair = smoothed_flairq / (nb_smooth)
-     mprage = smoothed_mprageq / (nb_smooth)
-     
-     flair_les = np.zeros_like(output_mask)
-     mprage_les = np.zeros_like(output_mask)
+     del data
+     gc.collect()
+     time.sleep(5)
+
+     matrix = (smoothed_flair / (nb_smooth * n_labels)).cpu().numpy()
      
      for label in range(1, n_labels):
-          #print(np.shape(flair_les))
-          patch_vector = np.where(wm_labels==label)
-          gcam = cam(x=inputs, class_idx=1, footprint=patch_vector)
-          gcam_map = nib.Nifti1Image(gcam[0,0].cpu().numpy(), input_affine)
-          nib.save(gcam_map, "{}/GradCAM_lesion{}_layer_{}_{}".format(output_dir, label, layer, outputname))
-          
-          flair_les = flair[label-1]
-          mprage_les = mprage[label-1]
-          flair_les_saliency = nib.Nifti1Image(flair_les, input_affine)
-          mprage_les_saliency = nib.Nifti1Image(mprage_les, input_affine)
-          nib.save(flair_les_saliency, "{}/flair_smooth_saliency_les_{}_{}".format(output_dir, label, outputname))
-          nib.save(mprage_les_saliency, "{}/mprage_smooth_saliency_les_{}_{}".format(output_dir, label, outputname))   
-     i+=1            
+          flair_les_saliency = nib.Nifti1Image(matrix[label-1], input_affine)
+          nib.save(flair_les_saliency, "{}/{}/flair_smooth_saliency_les_{}_{}".format(output_dir, patientname, label, outputname))
+     
+     matrix = torch.nn.functional.interpolate((smoothed_mprage / (nb_smooth * n_labels)), mode='bilinear').cpu().numpy()
+
+     for label in range(1, n_labels):
+          mprage_les_saliency = nib.Nifti1Image(matrix[label-1], input_affine)
+          nib.save(mprage_les_saliency, "{}/{}/mprage_smooth_saliency_les_{}_{}".format(output_dir, patientname, label, outputname))
+     logging.info(f"All XAI maps saved for patient ", patientname)
+     del matrix, flair_les_saliency, mprage_les_saliency
+     gc.collect()
+     time.sleep(5)
+     i+=1
