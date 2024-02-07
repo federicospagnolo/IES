@@ -184,7 +184,7 @@ for data in val_dataloader:
      
      # Generate and save GCAM++
      print("Generating XAI maps for method 1: GradCAM++...")
-     for label in range(1, n_labels):
+     for label in range(1, n_labels+1):
           patch_vector = np.where(wm_labels==label)
           gcam = cam(x=inputs, class_idx=1, footprint=patch_vector)
           gcam_map = nib.Nifti1Image(gcam[0,0].cpu().numpy(), input_affine)
@@ -203,7 +203,7 @@ for data in val_dataloader:
           outputs = model(noisy_input)
           output_mask = outputs[0,1]
 
-          for label in range(1, n_labels):
+          for label in range(1, n_labels+1):
                #print("        Lesion {}/{}".format(label,n_labels))
                patch_vector = np.where(wm_labels==label)
 
@@ -219,13 +219,13 @@ for data in val_dataloader:
 
      matrix = (smoothed_flair / (nb_smooth * n_labels)).cpu().numpy()
      
-     for label in range(1, n_labels):
+     for label in range(1, n_labels+1):
           flair_les_saliency = nib.Nifti1Image(matrix[label-1], input_affine)
           nib.save(flair_les_saliency, "{}/{}/flair_smooth_saliency_les_{}_{}".format(output_dir, patientname, label, outputname))
      
      matrix = torch.nn.functional.interpolate((smoothed_mprage / (nb_smooth * n_labels)), mode='bilinear').cpu().numpy()
 
-     for label in range(1, n_labels):
+     for label in range(1, n_labels+1):
           mprage_les_saliency = nib.Nifti1Image(matrix[label-1], input_affine)
           nib.save(mprage_les_saliency, "{}/{}/mprage_smooth_saliency_les_{}_{}".format(output_dir, patientname, label, outputname))
      logging.info(f"All XAI maps saved for patient ", patientname)
