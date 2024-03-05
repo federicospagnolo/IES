@@ -139,7 +139,7 @@ for data in val_dataloader:
      filename = data['flair_meta_dict']['filename_or_obj'][0]
      logging.info(f"Evaluate gradients in batch {filename}")
      inputs = data["inputs"].cuda() # 0 is flair, 1 is mprage
-     std = std_fraction * (inputs[0,0].max() - inputs[0,0].min())
+     std = std_fraction * (inputs[:,0].max() - inputs[:,0].min())
      input_affine = nib.load(filename).affine
 
      inputs.requires_grad_()
