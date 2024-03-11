@@ -1,6 +1,6 @@
 ################
 #written by Federico Spagnolo
-#usage: python ies.py --model_checkpoint model_epoch_31.pth --input_val_paths batch_data batch_data --input_prefixes flair_3d_sbr.nii.gz t1n_3d_sb.nii.gz --num_workers 0 --cache_rate 0.01 --threshold 0.3
+#usage: python ies_maxpool.py --model_checkpoint model_epoch_31.pth --input_val_paths batch_data batch_data --input_prefixes flair_3d_sbr.nii.gz t1n_3d_sb.nii.gz --num_workers 0 --cache_rate 0.01 --threshold 0.3
 ################
 # Import torch
 import torch
