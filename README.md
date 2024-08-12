@@ -20,10 +20,17 @@ python {FILENAME}.py --model_checkpoint model_epoch_31.pth --input_val_paths {PA
 
 ## Code Contributors
 
-This work is part of the project MSxplain, and is currently under review.
+This work is part of the project MSxplain, and a pre-print is available at https://doi.org/10.48550/arXiv.2406.09335 (arXiv).
 
 ## Author
 
 👤 **Federico Spagnolo**
 
 - Github: [@federicospagnolo](https://github.com/federicospagnolo)
+
+## References
+
+1. Spagnolo, F., Molchanova, N., Schaer, R., Bach Cuadra, M., Ocampo Pineda,
+M., Melie-Garcia, L., Granziera, C., Andrearczyk, V., Depeursinge, A.: Instance-
+level quantitative saliency in multiple sclerosis lesion segmentation. arXiv (2024).
+https://doi.org/10.48550/ARXIV.2406.09335
