@@ -27,6 +27,7 @@ This work is part of the project MSxplain, and a pre-print is available at https
 👤 **Federico Spagnolo**
 
 - Github: [@federicospagnolo](https://github.com/federicospagnolo)
+- | [LinkedIn](https://www.linkedin.com/in/federico-spagnolo/) |
 
 ## References
 
