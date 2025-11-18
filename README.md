@@ -54,7 +54,7 @@ editing folders name in the script as needed.
   <img src="Perilesional_plot.png" alt="Image 1" width="25%">
 </div>
 
-<p align="center"><em>Figure 3: (A): FLAIR masked out with dilation steps 1, 5 and 24 (top), and the corresponding output probability maps computed for U-Net (bottom). (B): Plots representing the number of segmented lesions (left) and the average across patients of the mean prediction score (right) at each dilation step for three tested networks (the transparency for each line represents its standard deviation).</em></p>
+<p align="center"><em>Figure 3: Plots representing the number of segmented lesions (left) and the average across patients of the mean prediction score (right) at each dilation step for three tested networks (the transparency for each line represents its standard deviation).</em></p>
 
 ## Code Contributors
 
