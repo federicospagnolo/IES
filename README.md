@@ -58,7 +58,7 @@ editing folders name in the script as needed.
 
 ## Code Contributors
 
-This work is part of the project MSxplain, and a pre-print is available at https://doi.org/10.48550/arXiv.2406.09335 (arXiv).
+This work is part of the project MSxplain, and a pre-print is available at https://doi.org/10.48550/arXiv.2406.09335 (arXiv). The present work was also used in Spagnolo et al. (2025) to improve the lesion detection performance of the U-Net.
 
 ## Author
 
@@ -69,7 +69,6 @@ This work is part of the project MSxplain, and a pre-print is available at https
 
 ## References
 
-1. Spagnolo, F., Molchanova, N., Schaer, R., Bach Cuadra, M., Ocampo Pineda,
-M., Melie-Garcia, L., Granziera, C., Andrearczyk, V., Depeursinge, A.: Instance-
-level quantitative saliency in multiple sclerosis lesion segmentation. arXiv (2024).
+1. Spagnolo, F., Molchanova, N., Schaer, R., Bach Cuadra, M., Ocampo Pineda, M., Melie-Garcia, L., Granziera, C., Andrearczyk, V., Depeursinge, A.: Instance-level quantitative saliency in multiple sclerosis lesion segmentation. arXiv (2024).
 https://doi.org/10.48550/ARXIV.2406.09335
+2. Spagnolo, F. et al. Exploiting XAI Maps to Improve MS Lesion Segmentation and Detection in MRI. In Celebi, M. E., Reyes, M., Chen, Z. & Li, X. (eds.) Medical Image Computing and Computer Assisted Intervention – MICCAI 2024 Workshops, 121–131, DOI: 10.1007/978-3-031-77610-6_12 (Springer Nature Switzerland, Cham, 2025).
