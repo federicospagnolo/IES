@@ -26,6 +26,13 @@ and
 python ies_maxpool_nets.py --model_checkpoint swin_epoch_41.pth --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --target_val_path {TARGET_PATH} --target_prefix {TARGET_FILENAME} --num_workers 0 --cache_rate 0.01 --threshold 0.4 --model swin_unetr --use_checkpoint
 ```
 
+<div style="display: flex; justify-content: center;">
+  <img src="image1.png" alt="Image 1" width="45%">
+  <img src="image2.png" alt="Image 2" width="45%">
+</div>
+
+<p align="center"><em>Figure 1: Caption describing both images.</em></p>
+
 To reproduce the experiment on the contextual information used by networks to detect lesions, run sequentially script `contextual_info_nets_csv.py` and `contextual_info_plot.py` with the following:
 ```
 python contextual_info_nets_csv.py --model_checkpoint {checkpoint.pth} --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --target_val_path {TARGET_PATH} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --target_prefix {TARGET_PATH} --num_workers 0 --cache_rate 0.01 --threshold {0.3 for unet, 0.4 else} --model {network}
@@ -34,7 +41,14 @@ and to plot
 ```
 python contextual_info_plot.py
 ```
-editing folders name in the script as needed. 
+editing folders name in the script as needed.
+
+<div style="display: flex; justify-content: center;">
+  <img src="image1.png" alt="Image 1" width="45%">
+  <img src="image2.png" alt="Image 2" width="45%">
+</div>
+
+<p align="center"><em>Figure 1: Caption describing both images.</em></p>
 
 ## Code Contributors
 
