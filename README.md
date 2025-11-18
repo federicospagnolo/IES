@@ -27,8 +27,15 @@ python ies_maxpool_nets.py --model_checkpoint swin_epoch_41.pth --input_val_path
 ```
 
 <div style="display: flex; justify-content: center;">
-  <img src="image1.png" alt="Image 1" width="45%">
-  <img src="image2.png" alt="Image 2" width="45%">
+  <img src="FLAIR_lesion.png" alt="Image 1" width="45%">
+  <img src="IES_nnU-Net.png" alt="Image 2" width="45%">
+</div>
+
+<p align="center"><em>Figure 1: Caption describing both images.</em></p>
+
+<div style="display: flex; justify-content: center;">
+  <img src="FLAIR_lesion.png" alt="Image 1" width="45%">
+  <img src="IES_Swin.png" alt="Image 2" width="45%">
 </div>
 
 <p align="center"><em>Figure 1: Caption describing both images.</em></p>
