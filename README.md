@@ -58,7 +58,7 @@ editing folders name in the script as needed.
 
 ## Code Contributors
 
-This work is part of the project MSxplain, and a [pre-print](https://doi.org/10.48550/arXiv.2406.09335) is available on arXiv. The present work was also used in [Spagnolo et al. (2025)](https://link.springer.com/chapter/10.1007/978-3-031-77610-6_12) to improve the lesion detection performance of the U-Net.
+This work, as part of the project [MSxplain](https://wp.unil.ch/mial/research/projects/msxplain/), is available on arXiv as a [pre-print](https://doi.org/10.48550/arXiv.2406.09335), and was also used in [Spagnolo et al. (2025)](https://link.springer.com/chapter/10.1007/978-3-031-77610-6_12) to improve the lesion detection performance of the U-Net.
 
 ## Author
 
