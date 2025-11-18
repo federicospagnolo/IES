@@ -31,14 +31,14 @@ python ies_maxpool_nets.py --model_checkpoint swin_epoch_41.pth --input_val_path
   <img src="IES_nnU-Net.png" alt="Image 2" width="25%">
 </div>
 
-<p align="center"><em>Figure 1: FLAIR coronal view with a visible periventricular lesion (left), instance-level explanation saliency generated with nnU-Net.</em></p>
+<p align="left"><em>Figure 1: FLAIR coronal view with a visible periventricular lesion (left), instance-level explanation saliency generated with nnU-Net.</em></p>
 
 <div style="display: flex; justify-content: center;">
   <img src="FLAIR_lesion.png" alt="Image 1" width="25%">
   <img src="IES_Swin.png" alt="Image 2" width="25%">
 </div>
 
-<p align="center"><em>Figure 2: FLAIR coronal view with a visible periventricular lesion (left), instance-level explanation saliency generated with Swin UNETR.</em></p>
+<p align="left"><em>Figure 2: FLAIR coronal view with a visible periventricular lesion (left), instance-level explanation saliency generated with Swin UNETR.</em></p>
 
 To reproduce the experiment on the perilesional information used by networks to detect lesions, run sequentially script `contextual_info_nets_csv.py` and `contextual_info_plot.py` with the following:
 ```
@@ -51,7 +51,7 @@ python contextual_info_plot.py
 editing folders name in the script as needed.
 
 <div style="display: flex; justify-content: center;">
-  <img src="Perilesional_plot.png" alt="Image 1" width="45%">
+  <img src="Perilesional_plot.png" alt="Image 1" width="75%">
 </div>
 
 <p align="left"><em>Figure 3: Plots representing the number of segmented lesions (left) and the average across patients of the mean prediction score (right) at each dilation step for three tested networks (the transparency for each line represents its standard deviation).</em></p>
