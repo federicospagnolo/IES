@@ -12,11 +12,29 @@ conda env create -f environment.yml
 ```
 to build the tested environment using the provided `environment.yml` file. 
 
-The `script ies.py` provides the instance-level explanation maps, obtained with methods based on SmoothGrad (average aggregation method) and GradCAM++. The script `ies_maxpool.py` provides the same maps using the max aggregation method.
+The script `ies.py` provides the instance-level explanation maps, obtained with methods based on SmoothGrad (average aggregation method) and GradCAM++. The script `ies_maxpool.py` provides the same maps using the max aggregation method.
 Usage is the following:
 ```sh
-python {FILENAME}.py --model_checkpoint model_epoch_31.pth --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --num_workers 0 --cache_rate 0.01 --threshold 0.3
+python {FILENAME}.py --model_checkpoint unet_epoch_31.pth --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --target_val_path {TARGET_PATH} --target_prefix {TARGET_FILENAME} --num_workers 0 --cache_rate 0.01 --threshold 0.3
 ```
+The script `ies_maxpool_nets.py` computes and saves XAI maps based on SmoothGrad (max aggregation method) for two other SOTA networks: nnU-Net and Swin UNETR. Usage is the following:
+```
+python ies_maxpool_nets.py --model_checkpoint nn-unet_epoch_31.pth --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --target_val_path {TARGET_PATH} --target_prefix {TARGET_FILENAME} --num_workers 0 --cache_rate 0.01 --threshold 0.4 --model nn-unet
+```
+and
+```
+python ies_maxpool_nets.py --model_checkpoint swin_epoch_41.pth --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --target_val_path {TARGET_PATH} --target_prefix {TARGET_FILENAME} --num_workers 0 --cache_rate 0.01 --threshold 0.4 --model swin_unetr --use_checkpoint
+```
+
+To reproduce the experiment on the contextual information used by networks to detect lesions, run sequentially script `contextual_info_nets_csv.py` and `contextual_info_plot.py` with the following:
+```
+python contextual_info_nets_csv.py --model_checkpoint {checkpoint.pth} --input_val_paths {PATH_TO_INPUT1} {PATH_TO_INPUT2} --target_val_path {TARGET_PATH} --input_prefixes {INPUT1_FILENAME} {INPUT2_FILENAME} --target_prefix {TARGET_PATH} --num_workers 0 --cache_rate 0.01 --threshold {0.3 for unet, 0.4 else} --model {network}
+```
+and to plot
+```
+python contextual_info_plot.py
+```
+editing folders name in the script as needed. 
 
 ## Code Contributors
 
