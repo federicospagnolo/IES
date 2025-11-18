@@ -51,7 +51,7 @@ python contextual_info_plot.py
 editing folders name in the script as needed.
 
 <div style="display: flex; justify-content: center;">
-  <img src="Perilesional_plot.png" alt="Image 1" width="25%">
+  <img src="Perilesional_plot.png" alt="Image 1" width="35%">
 </div>
 
 <p align="center"><em>Figure 3: Plots representing the number of segmented lesions (left) and the average across patients of the mean prediction score (right) at each dilation step for three tested networks (the transparency for each line represents its standard deviation).</em></p>
